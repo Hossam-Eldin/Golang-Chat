@@ -54,9 +54,18 @@ func main() {
 	r.tracer = trace.New(os.Stdout)
 
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "index.html"}))
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+
 	http.Handle("/login", &templateHandler{filename: "login.html"})
+
+	http.HandleFunc("/uploader", uploaderHandler)
+
 	http.HandleFunc("/auth/", loginHandler)
 	http.Handle("/room", r)
+
+	http.Handle("/avatars/",
+		http.StripPrefix("/avatars/",
+			http.FileServer(http.Dir("./avatars"))))
 	//serving the assets folder in http way
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
